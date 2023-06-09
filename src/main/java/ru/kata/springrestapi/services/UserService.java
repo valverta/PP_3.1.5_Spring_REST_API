@@ -1,6 +1,7 @@
 package ru.kata.springrestapi.services;
 
 
+import ru.kata.springrestapi.DTO.UserDTO;
 import ru.kata.springrestapi.models.User;
 
 import java.util.List;
@@ -19,4 +20,8 @@ public interface UserService {
     public void update(User user);
 
     public void removeById(long id);
+
+    public User convertToUser(UserDTO userDTO);
+
+    public UserDTO convertToUserDTO(User user);
 }

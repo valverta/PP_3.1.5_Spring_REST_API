@@ -1,5 +1,6 @@
 package ru.kata.springrestapi.services;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -7,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.springrestapi.DTO.UserDTO;
 import ru.kata.springrestapi.models.User;
 import ru.kata.springrestapi.repositories.UserRepository;
 import ru.kata.springrestapi.utils.UserNotFoundException;
@@ -18,12 +20,12 @@ import java.util.Optional;
 public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final UserRepository userRepository;
-    private final RoleService roleService;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleService roleService) {
+    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
         this.userRepository = userRepository;
-        this.roleService = roleService;
+        this.modelMapper = modelMapper;
     }
 
     @Transactional
@@ -44,7 +46,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     @Transactional
     public void save(User user) {
-        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -60,12 +61,19 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     @Transactional
     public void update(User user) {
-        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         userRepository.save(user);
     }
 
     @Transactional
     public void removeById(long id) {
         userRepository.delete(getUserById(id));
+    }
+
+    public User convertToUser(UserDTO userDTO) {
+        return modelMapper.map(userDTO, User.class);
+    }
+
+    public UserDTO convertToUserDTO(User user) {
+        return modelMapper.map(user, UserDTO.class);
     }
 }

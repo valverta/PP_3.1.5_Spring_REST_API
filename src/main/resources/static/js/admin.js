@@ -90,8 +90,6 @@ tableTr.addEventListener("click", (e) => {
                 .then(() => location.reload());
         })
     } else if (e.target.id === 'edit-btn') {
-        // let userBtnPressed;
-        // let adminBtnPressed;
         let formEdit = document.forms['form-edit-modal'];
 
         fetch(apiAdmUrl + id)
@@ -105,11 +103,6 @@ tableTr.addEventListener("click", (e) => {
                 $("#password").attr('value', data.password);
 
                 $('#exampleModal').modal();
-
-                // document.getElementById('roles').addEventListener("click", (click) => {
-                //     userBtnPressed = click.target.id === 'roles-option1';
-                //     adminBtnPressed = click.target.id === 'roles-option2';
-                // })
             });
         document.getElementById('edit-submit').addEventListener('click', (submit) => {
            submit.preventDefault();
@@ -123,15 +116,6 @@ tableTr.addEventListener("click", (e) => {
                     });
                 }
             }
-           // let roleId;
-           // let roleName;
-           // if (userBtnPressed) {
-           //     roleId = 1;
-           //     roleName = 'ROLE_USER';
-           // } else if (adminBtnPressed) {
-           //     roleId = 2;
-           //     roleName = 'ROLE_ADMIN';
-           // }
            fetch(apiAdmUrl, {
                method: 'PATCH',
                headers: {
@@ -181,5 +165,5 @@ document.getElementById('add-new-user').addEventListener('click', (event) => {
             roles: rolesArray,
         })
     }).then(newUser => newUser.json())
-        .then(() => location.reload());
+        .then(() => location.reload())
 });

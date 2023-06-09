@@ -4,6 +4,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -23,31 +24,29 @@ public class Controller {
 
     private final UserService userService;
     private final UserValidator validator;
-    private final ModelMapper modelMapper;
 
     @Autowired
-    public Controller(UserService userService, UserValidator validator, ModelMapper modelMapper) {
+    public Controller(UserService userService, UserValidator validator) {
         this.userService = userService;
         this.validator = validator;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping
     public List<UserDTO> getAllUsers() {
         return userService.getAllUsers().stream()
-                .map(user -> convertToUserDTO(user))
+                .map(user -> userService.convertToUserDTO(user))
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
     public UserDTO getUser(@PathVariable("id") Long id) {
-        return convertToUserDTO(userService.getUserById(id));
+        return userService.convertToUserDTO(userService.getUserById(id));
     }
 
     @PostMapping
     public ResponseEntity<HttpStatus> createUser(@RequestBody @Valid UserDTO userDTO,
                                                  BindingResult bindingResult) {
-        validator.validate(convertToUser(userDTO), bindingResult);
+        validator.validate(userService.convertToUser(userDTO), bindingResult);
 
         if (bindingResult.hasErrors()) {
             StringBuilder errorMsg = new StringBuilder();
@@ -61,7 +60,8 @@ public class Controller {
             }
             throw new UserNotCreatedException(errorMsg.toString());
         }
-        userService.save(convertToUser(userDTO));
+        userDTO.setPassword(new BCryptPasswordEncoder().encode(userDTO.getPassword()));
+        userService.save(userService.convertToUser(userDTO));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -80,7 +80,10 @@ public class Controller {
             }
             throw new UserNotCreatedException(errorMsg.toString());
         }
-        userService.update(convertToUser(userDTO));
+        String pass = userDTO.getPassword();
+        if (pass.length() < 30 && !pass.startsWith("$"))
+            userDTO.setPassword(new BCryptPasswordEncoder().encode(pass));
+        userService.update(userService.convertToUser(userDTO));
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -88,13 +91,5 @@ public class Controller {
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id) {
         userService.removeById(id);
         return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    private User convertToUser(UserDTO userDTO) {
-        return modelMapper.map(userDTO, User.class);
-    }
-
-    private UserDTO convertToUserDTO(User user) {
-        return modelMapper.map(user, UserDTO.class);
     }
 }
