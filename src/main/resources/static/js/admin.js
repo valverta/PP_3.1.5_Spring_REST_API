@@ -1,5 +1,7 @@
 const authUrl = 'http://localhost:8080/api/auth';
 const apiAdmUrl = 'http://localhost:8080/api/admin/';
+const token = $("meta[name='_csrf']").attr("content");
+const header = $("meta[name='_csrf_header']").attr("content");
 
 fetch(authUrl)
     .then(res => res.json())
@@ -85,6 +87,9 @@ tableTr.addEventListener("click", (e) => {
             e.preventDefault();
             fetch(apiAdmUrl + id, {
                 method: 'DELETE',
+                headers: {
+                    [header]: token
+                }
             })
                 .then(res => res.json())
                 .then(() => location.reload());
@@ -119,6 +124,7 @@ tableTr.addEventListener("click", (e) => {
            fetch(apiAdmUrl, {
                method: 'PATCH',
                headers: {
+                   [header]: token,
                    'Content-Type': 'application/json'
                },
                body: JSON.stringify({
@@ -154,6 +160,7 @@ document.getElementById('add-new-user').addEventListener('click', (event) => {
     fetch(apiAdmUrl, {
         method: 'POST',
         headers: {
+            [header]: token,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({

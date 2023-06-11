@@ -25,18 +25,17 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/admin").hasRole("ADMIN")
-//                .antMatchers("/", "/login", "/registration").permitAll()
+//                .antMatchers("/login").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
 //                .loginPage("/login").loginProcessingUrl("/process_login")
                 .successHandler(successUserHandler).permitAll()
 //                .failureUrl("/login?error")
-                .and()
-                .logout().permitAll();
-//                .logoutUrl("/logout").logoutSuccessUrl("/");
+                .and().logout()
+                .permitAll();
+//                .logoutUrl("/logout").logoutSuccessUrl("/login");
 
-        http.csrf().disable();
         return http.build();
     }
 
