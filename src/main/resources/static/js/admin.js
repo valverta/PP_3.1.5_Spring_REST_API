@@ -22,11 +22,13 @@ fetch(authUrl)
 
 const tableTr = document.getElementById('table-admin')
 let output = '';
-fetch(apiAdmUrl)
-    .then(res => res.json())
-    .then(data => {
-        data.forEach(tab => {
-            output += `
+function f() {
+    output = '';
+    fetch(apiAdmUrl)
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(tab => {
+                output += `
                     <tr>
                         <td>${tab.id}</td>
                         <td>${tab.firstName}</td>
@@ -36,10 +38,10 @@ fetch(apiAdmUrl)
                         <td>
                             <div style="display: inline-block;">
                                 <txt>`;
-            tab.roles.forEach(role => {
-                output += `${role.roleName.substring(5)} `;
-            })
-            output += `</txt>
+                tab.roles.forEach(role => {
+                    output += `${role.roleName.substring(5)} `;
+                })
+                output += `</txt>
                             </div>
                         </td>
                         <td>
@@ -55,9 +57,11 @@ fetch(apiAdmUrl)
                             </button>
                         </td>
                     </tr>`;
+            });
+            tableTr.innerHTML = output;
         });
-        tableTr.innerHTML = output;
-    });
+}
+f();
 
 tableTr.addEventListener("click", (e) => {
     const id = e.target.dataset.id;
@@ -92,7 +96,12 @@ tableTr.addEventListener("click", (e) => {
                 }
             })
                 .then(res => res.json())
-                .then(() => location.reload());
+                .then(data => {
+                $('#exampleModal2').modal('hide');
+                f();
+            })
+                .catch(error => console.log(error));
+
         })
     } else if (e.target.id === 'edit-btn') {
         let formEdit = document.forms['form-edit-modal'];
@@ -138,7 +147,11 @@ tableTr.addEventListener("click", (e) => {
                })
            })
                .then(edit => edit.json())
-               .then(() => location.reload())
+               .then(data => {
+               $('#exampleModal').modal('hide');
+               f();
+           })
+               .catch(error => console.log(error));
         });
     }
 });
@@ -172,5 +185,15 @@ document.getElementById('add-new-user').addEventListener('click', (event) => {
             roles: rolesArray,
         })
     }).then(newUser => newUser.json())
-        .then(() => location.reload())
+        .then(data => {
+            f();
+            formAdd.reset();
+            // show the content of id="home"
+            document.getElementById('home-tab').classList.add('active');
+            document.getElementById('home').classList.add('show', 'active');
+
+            // hide the content of id="profile"
+            document.getElementById('profile-tab').classList.remove('active');
+            document.getElementById('profile').classList.remove('show', 'active');
+        })
 });
