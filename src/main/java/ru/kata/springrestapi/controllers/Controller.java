@@ -48,38 +48,16 @@ public class Controller {
                                                  BindingResult bindingResult) {
         validator.validate(userService.convertToUser(userDTO), bindingResult);
 
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-
-            for (int i = 0; i < fieldErrors.size(); i++) {
-                errorMsg.append(fieldErrors.get(i).getField())
-                        .append(" - ").append(fieldErrors.get(i).getDefaultMessage());
-                if (i != (fieldErrors.size() - 1))
-                    errorMsg.append("; ");
-            }
-            throw new UserNotCreatedException(errorMsg.toString());
-        }
+        extracted(bindingResult);
         userDTO.setPassword(new BCryptPasswordEncoder().encode(userDTO.getPassword()));
         userService.save(userService.convertToUser(userDTO));
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok(HttpStatus.CREATED);
     }
 
     @PatchMapping
     public ResponseEntity<HttpStatus> updateUser(@RequestBody @Valid UserDTO userDTO,
                                                  BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-
-            for (int i = 0; i < fieldErrors.size(); i++) {
-                errorMsg.append(fieldErrors.get(i).getField())
-                        .append(" - ").append(fieldErrors.get(i).getDefaultMessage());
-                if (i != (fieldErrors.size() - 1))
-                    errorMsg.append("; ");
-            }
-            throw new UserNotCreatedException(errorMsg.toString());
-        }
+        extracted(bindingResult);
         String pass = userDTO.getPassword();
         if (pass.length() < 30 && !pass.startsWith("$"))
             userDTO.setPassword(new BCryptPasswordEncoder().encode(pass));
@@ -88,8 +66,25 @@ public class Controller {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable("id") Long id) {
+//    public ResponseEntity<HttpStatus> deleteUser(@PathVariable("id") Long id) {
         userService.removeById(id);
-        return ResponseEntity.ok(HttpStatus.OK);
+//        return ResponseEntity.ok(HttpStatus.OK);
+    }
+
+    private static void extracted(BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder();
+            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+
+            for (int i = 0; i < fieldErrors.size(); i++) {
+                errorMsg.append(fieldErrors.get(i).getField())
+                        .append(" - ").append(fieldErrors.get(i).getDefaultMessage());
+                if (i != (fieldErrors.size() - 1))
+                    errorMsg.append("; ");
+            }
+            throw new UserNotCreatedException(errorMsg.toString());
+        }
     }
 }

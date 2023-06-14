@@ -21,9 +21,8 @@ fetch(authUrl)
     });
 
 const tableTr = document.getElementById('table-admin')
-let output = '';
 function f() {
-    output = '';
+    let output = '';
     fetch(apiAdmUrl)
         .then(res => res.json())
         .then(data => {
